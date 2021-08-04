@@ -61,7 +61,7 @@ GOTO *RECEIVE
 	SETREAL 4, SYSTEM!(103), 64
 	SETREAL 4, SYSTEM!(104), 68
 	SETREAL 4, SYSTEM!(105), 72
-	SETREAL 4, SYSTEM!(110), 76
+	SETREAL 4, SYSTEM!(106), 76
 	'Send data using socket 3, buffer 4, size: 80 bytes, timeout: 5s, sent data size (V150%) - not used
 	SOCKSEND 3,4,80,5,V150%
 	'Goes to *ERROR if there is an error
@@ -77,4 +77,4 @@ GOTO *RECEIVE
 	SOCKCLOSE 3
 	PAUSE 1000
 'Receive the next packet
-GOTO *RESTART
+GOTO *RESTART 

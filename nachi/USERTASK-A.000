@@ -6,7 +6,12 @@ RESET O2000
 
 FORKMCR 1,9
 FORKMCR 2,9
+
+V100%=0
+V101%=0
+
 GOTO *RESTART
+
 
 *STARTERROR
 SET O2000
@@ -15,10 +20,18 @@ END
 *RESTART
 'Create socket number 1 using UDP
 SOCKCREATE 1,1
+
+'Goes to *ERROR if there is an error
+IF E1%<0 THEN *ERROR
+
 'Set the port of socket 1 to 8000
 SOCKBIND 1,8000
 'Wait for connection using socket 1, comm port 2, with no timeout
-SOCKWAIT 1,2,0
+
+
+'Goes to *ERROR if there is an error
+IF E1%<0 THEN *ERROR
+
 *RECEIVE
 'Receive from socket 1, to buffer 1, 260 bytes, 0 timeout
 'V150% will contain the length of the data received

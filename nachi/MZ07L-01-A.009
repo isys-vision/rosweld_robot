@@ -26,7 +26,7 @@ GOTO *COMMAND
 	'Force variable update
 	INH
 	'Go to pose
-	MOVEX A=1,AC=0,SM=0,M1X,L,P[1],S=MOVE_SPEED,H=4,MS,M2J,P,P[1],S=MOVE_SPEED,H=1
+	MOVEX A=1,AC=0,SM=0,M1X,L,P[1],S=MOVE_SPEED,H=4,MS
 	'The store execution is done. This output is connected to STORE_FLAG_I using soft PLC
 	RESET POSE_FLAG_O
 GOTO *COMMAND
@@ -80,7 +80,7 @@ GOTO *COMMAND
 
 	'Go through the path points. The length of the path is relative to the whole path to be able to synch with the verify path.
 	FOR CURRENT_MOVE=PLAY_START TO PLAY_END STEP PLAY_DIR
-        MOVEX A=1,AC=0,SM=0,M1X,L,P[CURRENT_MOVE],S=MOVE_SPEED,H=4,MS,M2J,P,P[CURRENT_MOVE],S=MOVE_SPEED,H=1
+        MOVEX A=1,AC=0,SM=0,M1X,L,P[CURRENT_MOVE],S=MOVE_SPEED,H=4,MS
 		
 		'start the arc
 		IF ARC_START_I=1
