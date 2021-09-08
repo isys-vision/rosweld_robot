@@ -56,6 +56,12 @@ CASE 5
 GOTO *ABORT
 CASE 6
 GOTO *SETPOSE
+CASE 7
+GOTO *SETIO
+CASE 8
+GOTO *READIO   
+CASE 10
+GOTO *SETJOINTS 
 CASE
 GOTO *ERROR
 ENDS
@@ -79,6 +85,62 @@ GOTO *RECEIVE
 *SETSPEED
 	'Read the speed from the message
 	GETINT 1, MOVE_SPEED, 8
+'Receive the next packet
+GOTO *RESPONSE
+
+*SETIO
+	'Read the type, input or output. 0 = output, 1 = input
+	GETINT 1, V15%, 8
+	'Read the number of the input/output
+	GETINT 1, V16%, 12
+	'Read the value of the input/output
+	GETINT 1, V17%, 16
+	
+	IF (V15% = 0)
+        IF (V17% = 1)
+            SET O[V16%]
+        ELSEIF (V17% = 0)
+            RESET O[V16%]
+        ELSE
+            GOTO *ERROR            
+        ENDIF
+    ENDIF    
+    
+'Receive the next packet
+GOTO *RESPONSE
+
+*READIO
+	'Read the type, input or output.
+	GETINT 1, V15%, 8
+	'Read the number of the input/output
+	GETINT 1, V16%, 12
+	
+    'RESERVED = 0,
+    'DIGITAL_IN = 1,
+    'DIGITAL_OUT = 2,
+    'ANALOGUE_IN = 3,
+    'ANALOGUE_OUT = 4,
+    'GROUPED_IN = 5,
+    'GROUPED_OUT = 6,
+    'FLAGS = 7
+
+	
+	IF (V15% = 2)
+        V17% = O[V16%]
+    ELSEIF (V15% = 1)
+        V17% = I[V16%]
+    ELSE
+        GOTO *ERROR            
+    ENDIF
+    
+    'SETINT 4, V17%, 4
+    
+    SETSTR 4, STR$(O[V16%]), 0, 1
+    'Send data using socket 3, buffer 4, size: 80 bytes, timeout: 5s, sent data size (V150%) - not used
+    SOCKSEND 3,4,1,5,V150%
+	'Goes to *ERROR if there is an error
+	IF E1%<0 THEN *ERROR
+       
 'Receive the next packet
 GOTO *RESPONSE
 
@@ -117,6 +179,30 @@ GOTO *RESPONSE
 	*WAITFORPOSE
 		PAUSE 50
 	IF POSE_FLAG_O=1 THEN *WAITFORPOSE
+
+GOTO *RESPONSE
+
+*SETJOINTS
+	L3% = STORE_FIRST_IDX
+	'Read bytes from buffer 1 to real L3%+[0..5] using bytes L4%+[20..40]
+	GETREAL 1, V![L3% + 0], 12
+	GETREAL 1, V![L3% + 1], 16
+	GETREAL 1, V![L3% + 2], 20
+	GETREAL 1, V![L3% + 3], 24
+	GETREAL 1, V![L3% + 4], 28
+	GETREAL 1, V![L3% + 5], 32
+	GETREAL 1, V![L3% + 6], 36
+	GETINT 1, POSE_INDEX, 40
+	
+	IF POSE_INDEX > -1
+		CURRENT_MOVE = POSE_INDEX
+	ENDIF	 
+
+	SET POSE_FLAG_O
+	'Pause until the POSE_FLAG_O remains 1
+	*WAITFORJOINT
+		PAUSE 50
+	IF POSE_FLAG_O=1 THEN *WAITFORJOINT
 
 GOTO *RESPONSE
 

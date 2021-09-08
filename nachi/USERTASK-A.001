@@ -5,7 +5,7 @@ INCLUDE "VAR"
 
 *RESTART
 'Create socket number 1 using UDP
-SOCKCREATE 3,1
+SOCKCREATE 3,1  ' Parameter 1 = Socket Number, Parameter 2 = TCP -> 0 UDP -> 1
 'Set the port of socket 3 to 8001
 SOCKBIND 3,8001
 'Wait for connection using socket 3, comm port 4, with no timeout
@@ -15,9 +15,15 @@ SOCKWAIT 3,4,0
 'V150% will contain the length of the data received
 'Delete the CMD_STATUS_RD
 CMD_STATUS_RD=0
-SOCKRECV 3,3,260,0,V150%
+SOCKRECV 3,3,260,0,V150%  ' Parameter 3 = Receiving Data Length in bytes
 'Goes to *ERROR if there is an error
 IF E1%<0 THEN *ERROR
+
+
+' Timos Initialisierungen:   ***********************************************************
+V16$ = ""    'Send IO
+DIM SendIODataLen AS INTEGER
+SendIODataLen = 3
 
 'Read the SEQ_STATUS_RD sequence id from buffer 3 starting from byte 0
 GETINT 3, SEQ_STATUS_RD, 0
@@ -62,8 +68,15 @@ GOTO *RECEIVE
 	SETREAL 4, SYSTEM!(104), 68
 	SETREAL 4, SYSTEM!(105), 72
 	SETREAL 4, SYSTEM!(106), 76
+	
+	' Timos Kram: IOs: O = Output und I fuer Input ? KA
+	V16$ = STR$(O[1])
+	V16$ = V16$ + STR$(O[2])
+	V16$ = V16$ + STR$(O[3])
+	SETSTR 4, STR$(O[1])+STR$(O[2])+STR$(O[3]), 80, SendIODataLen
+	
 	'Send data using socket 3, buffer 4, size: 80 bytes, timeout: 5s, sent data size (V150%) - not used
-	SOCKSEND 3,4,80,5,V150%
+	SOCKSEND 3,4,84,5,V150%
 	'Goes to *ERROR if there is an error
 	IF E1%<0 THEN *ERROR
 'Receive the next packet
